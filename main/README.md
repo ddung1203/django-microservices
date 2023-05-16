@@ -30,6 +30,15 @@ def publish():
 ```
 
 ``` bash
-python consumer.py
+# PUT/POST/DELETE
+
+# main - flask
+mysql> select * from product;
++----+-----------+-----------+
+| id | title     | image     |
++----+-----------+-----------+
+|  2 | new title | new image |
++----+-----------+-----------+
 ```
 
+TypeError: Object of type Product is not JSON serializable
