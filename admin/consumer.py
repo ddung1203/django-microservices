@@ -5,7 +5,7 @@ django.setup()
 
 from products.models import Product
 
-params = pika.URLParameters('amqps://tdetwkla:LN5DfpbG_YOvHSdSK8PXIjiE4D6aT0_X@dingo.rmq.cloudamqp.com/tdetwkla')
+params = pika.URLParameters('amqp://192.168.56.100:5672')
 
 connection = pika.BlockingConnection(params)
 
