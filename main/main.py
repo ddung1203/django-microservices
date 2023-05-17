@@ -3,7 +3,6 @@ from flask import Flask, abort, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import requests
-from sqlalchemy import UniqueConstraint
 
 from producer import publish
 
@@ -28,8 +27,10 @@ class ProductUser(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer)
   product_id = db.Column(db.Integer)
-
-  UniqueConstraint('user_id', 'product_id', name='user_product_unique')
+  
+  __table_args__ = (
+        db.UniqueConstraint('user_id', 'product_id', name='user_product_unique'),
+    )
 
 
 @app.route('/api/products')
