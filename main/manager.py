@@ -1,8 +1,10 @@
-from flask_migrate import Migrate
 from main import app, db
+from flask_migrate import Migrate
+from flask.cli import FlaskGroup
 
 migrate = Migrate(app, db)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128))
+cli = FlaskGroup(app)
+
+if __name__ == '__main__':
+    cli()
