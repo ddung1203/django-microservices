@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'admin',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': 'db',
+        'HOST': 'admin-mysql.default.svc.cluster.local',
         'PORT': '3306',
     }
 }

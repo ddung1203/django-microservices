@@ -2,7 +2,7 @@ import pika, json
 
 from main import Product, db, app
 
-params = pika.URLParameters('amqp://192.168.56.100:5672')
+params = pika.URLParameters('amqp://rabbitmq-svc.default.svc.cluster.local:5672')
 
 connection = pika.BlockingConnection(params)
 

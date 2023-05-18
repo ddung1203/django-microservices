@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: main-mysql
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-mysql
+spec:
+  selector:
+    matchLabels:
+      app: main-mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: main-mysql
+    spec:
+      containers:
+      - image: mysql:8.0.33-debian
+        name: main-mysql
+        env:
+          # Use secret in real usage
+        - name: MYSQL_DATABASE
+          value: main
+        - name: MYSQL_PASSWORD
+          value: root
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+          name: main-mysql
+        volumeMounts:
+        - name: main-mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: main-mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: main-mysql-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: main-mysql-pv-claim
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi

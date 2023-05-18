@@ -1,6 +1,6 @@
 import pika, json
 
-params = pika.URLParameters('amqp://192.168.56.100:5672')
+params = pika.URLParameters('amqp://rabbitmq-svc.default.svc.cluster.local:5672')
 
 def publish(method, body):
     connection = pika.BlockingConnection(params)

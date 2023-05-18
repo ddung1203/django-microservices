@@ -7,7 +7,7 @@ import requests
 from producer import publish
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://root:root@db/main'
+app.config["SQLALCHEMY_DATABASE_URI"] = 'mysql://root:root@main-mysql.default.svc.cluster.local/main'
 CORS(app)
 
 db = SQLAlchemy(app)
@@ -39,7 +39,7 @@ def index():
 
 @app.route('/api/products/<int:id>/like', methods=['POST'])
 def like(id):
-  req = requests.get('http://192.168.56.100:8000/api/user')
+  req = requests.get('http://admin-svc-np.default.svc.cluster.local:8000/api/user')
   json = req.json()
 
   try:
