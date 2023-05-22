@@ -26,13 +26,13 @@ spec:
     spec:
       containers:
         - name: main
-          image: ddung1203/main:1
+          image: ddung1203/main:4
           command: ["python",  "main.py"]
           ports:
             - containerPort: 5000
       initContainers:
         - name: db-init
-          image: ddung1203/main:1
+          image: ddung1203/main:4
           command:
           - "sh"
           - "-c"
