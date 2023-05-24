@@ -10,6 +10,13 @@ MSA는 API를 통해서만 상호작용할 수 있으며, 각각의 서비스는
 
 상기와 같이 앱을 서로 통신하는 작은 부분으로 나눌 수 있다. 이를 통해 트래픽을 기반으로 애플리케이션을 쉽게 확장할 수 있으며, 일부 장애가 전체 서비스로 확장될 가능성이 낮다.
 
+### [Bakend](https://github.com/ddung1203/python-microservices)
+
+### [Frontend](https://github.com/ddung1203/react-crud)
+
+### [DevOps](https://github.com/ddung1203/django-argocd)
+
+
 ## Kubernetes settings
 
 | name | cpu | memory | ip |
