@@ -28,19 +28,44 @@ spec:
       - image: mysql:8.0.33-debian
         name: admin-mysql
         env:
-          # Use secret in real usage
         - name: MYSQL_DATABASE
-          value: admin
+          valueFrom:
+            secretKeyRef:
+              name: admin-mysql-secret
+              key: MYSQL_DATABASE
         - name: MYSQL_PASSWORD
-          value: root
+          valueFrom:
+            secretKeyRef:
+              name: admin-mysql-secret
+              key: MYSQL_PASSWORD
         - name: MYSQL_ROOT_PASSWORD
-          value: root
+          valueFrom:
+            secretKeyRef:
+              name: admin-mysql-secret
+              key: MYSQL_ROOT_PASSWORD
         ports:
         - containerPort: 3306
           name: admin-mysql
         volumeMounts:
         - name: admin-mysql-persistent-storage
           mountPath: /var/lib/mysql
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command: ["/bin/sh", "-c", "mysqladmin ping -p$MYSQL_PASSWORD"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            # Check we can execute queries over TCP (skip-networking is off).
+            command: ["/bin/sh", "-c", "mysqladmin ping -p$MYSQL_PASSWORD"]
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
       volumes:
       - name: admin-mysql-persistent-storage
         persistentVolumeClaim:
