@@ -4,6 +4,10 @@ MSA는 각각을 Micro하게 나눈 서비스 지향 아키텍처로, 필요한 
 
 MSA는 API를 통해서만 상호작용할 수 있으며, 각각의 서비스는 end-point를 API 형태로 외부에 노출하고, 실질적인 세부 사항은 모두 추상화한다.
 
+또한, 본 프로젝트는 Istio를 통한 서비스 메시에 대한 이해와 활용을 목적으로 한다.
+
+[Istio 실습](#istio-실습)
+
 ## Architecture
 
 ![Architecture](./img/architecture.png)
@@ -341,3 +345,62 @@ spec:
             - containerPort: 15672
               protocol: TCP
 ```
+
+## Istio 실습
+
+### Istio 기본 
+
+**[TIL - Istio](https://github.com/ddung1203/TIL/blob/main/k8s/19_Istio.md)**
+
+
+**네임스페이스 생성**
+
+``` bash
+kubectl create ns istio
+```
+
+**사이드카 프록시 인젝션**
+
+namespace에 레이블을 추가하면 istiod(오퍼레이터)가 해당 namespace의 pod spec에 자동으로 sidecar 설정을 주입
+
+``` bash
+kubectl lable ns istio istio-injection=enabled
+```
+
+istio가 설치되면 kube-apiserver에 mutating webhook admission controller가 생성된다. 이 controller는 Pod 생성 event가 발생하면 sidecar로 proxy container를 자동으로 추가해주는 plugin이다.
+
+mutatingwebhookconfigutation을 확인하면, matchLabels에 istio-injection=enabled인 namespace를 대상으로 sidecar injection을 수행하도록 되어있다.
+
+label 제거
+
+``` bash
+kubectl label ns istio istio-injection-
+```
+
+> 수동 sidecar injection
+> 
+> ``` bash
+> istioctl kube-inject -f ./admin.yaml | kubectl apply -f -
+> ```
+
+> 참고
+> initContainer는 사이드카가 시작되기 전에 실행된다. 컨테이너가 Istio의 initContainer보다 먼저 실행되면 보안 상 좋지 않다. 또한 Istio 이후에 컨테이너가 실행되면 네트워크에 액세스할 수 없다.
+> initContainer에서 network I/O를 수행하지 않도록 해야한다. 연결이 필요한 initContainer를 사용해야 하는 경우 work around가 필요하다.
+> 만약, InitContainer를 사용하는 경우, Pod의 init이 완료되지 않는다.
+>
+> 따라서, Flask와 Django의 db init 및 migrate의 경우 Pod 배포 후 exec로 작업을 하였다.
+>
+> [admin의 initContainer 삭제 필요](#admin)
+>
+> [K8s Istio sidecar injection with other init containers](https://discuss.istio.io/t/k8s-istio-sidecar-injection-with-other-init-containers/845)
+
+``` bash
+#!/usr/bin/sh
+
+kubectl exec -it deployment.apps/admin-deploy -- python manage.py migrate
+
+kubectl exec -it deployment.apps/main-deploy -- flask --app manager db init
+kubectl exec -it deployment.apps/main-deploy -- flask --app manager db migrate
+kubectl exec -it deployment.apps/main-deploy -- flask --app manager db upgrade
+```
+

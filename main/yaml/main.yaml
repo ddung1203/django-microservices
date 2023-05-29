@@ -44,16 +44,16 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 1
-      initContainers:
-        - name: db-init
-          image: ddung1203/main:4
-          command:
-          - "sh"
-          - "-c"
-          - |
-            if [ ! -f /app/init_complete ]; then
-              flask --app manager db init
-              flask --app manager db migrate
-              flask --app manager db upgrade
-              touch /app/init_complete
-            fi
+      # initContainers:
+      #   - name: db-init
+      #     image: ddung1203/main:4
+      #     command:
+      #     - "sh"
+      #     - "-c"
+      #     - |
+      #       if [ ! -f /app/init_complete ]; then
+      #         flask --app manager db init
+      #         flask --app manager db migrate
+      #         flask --app manager db upgrade
+      #         touch /app/init_complete
+      #       fi
