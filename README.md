@@ -1,12 +1,25 @@
 # Python Microservices Web App - Django, Flask, React, DevOps
 
-MSA는 각각을 Micro하게 나눈 서비스 지향 아키텍처로, 필요한 부분만 업데이트 및 배포가 가능하다.
+기존 소프트웨어는 Monolothic한 성격을 지니고 있다. 이 경우 하나의 애플리케이션이 다른 애플리케이션과 결합되어 있어 유지관리 및 운영 측면에서 독립적인 기능 업데이트 및 변경이 어려운 점과 특정 서비스만 스케일링이 불가능한 문제를 마주하게 된다. 이런 문제들을 해결하기 위해 등장한 것이 MSA(Micro Service Architecture)이다.
 
-MSA는 API를 통해서만 상호작용할 수 있으며, 각각의 서비스는 end-point를 API 형태로 외부에 노출하고, 실질적인 세부 사항은 모두 추상화한다.
+MSA는 각각을 Micro하게 나눈 서비스 지향 아키텍처로, 필요한 부분만 업데이트 및 배포가 가능하다. MSA는 API를 통해서만 상호작용할 수 있으며, 각각의 서비스는 end-point를 API 형태로 외부에 노출하고, 실질적인 세부 사항은 모두 추상화한다.
 
-또한, 본 프로젝트는 Istio를 통한 서비스 메시에 대한 이해와 활용을 목적으로 한다.
+하지만, MSA를 도입함에 있어 문제점이 발생한다.
 
-### [Istio 실습](#istio-실습)
+- Monolothic 아키텍처에 비해 서비스가 분산이 되어 있기 때문에 서비스 간 통신에 있어 복잡성이 증가
+- 데이터에 대한 트랜잭션 유지 어려움
+- 장애 추적 및 모니터링에 대한 어려움
+- 통합 테스트에 대한 어려움
+
+Service Mesh는 인프라 레이어에서 처리하는 방법이다.
+
+- 트래픽 제어
+- 세분화된 보안 정책 적용
+- Tracing 제공
+
+본 프로젝트는 Istio를 통한 서비스 메시에 대한 이해와 활용을 목적으로 한다.
+
+### [Istio 실습](#istio-ec8ba4ec8ab5-1)
 
 ## Architecture
 
@@ -352,6 +365,7 @@ spec:
 
 **[TIL - Istio](https://github.com/ddung1203/TIL/blob/main/k8s/19_Istio.md)**
 
+Service Mesh는 일반적으로 Sidecar Pattern으로 구성된다.
 
 **네임스페이스 생성**
 
