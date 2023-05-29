@@ -419,3 +419,13 @@ kubectl exec -it deployment.apps/main-deploy -- flask --app manager db migrate
 kubectl exec -it deployment.apps/main-deploy -- flask --app manager db upgrade
 ```
 
+### Kiali
+
+``` bash
+istioctl dashboard kiali
+```
+
+하기와 같이 실제 구축한 애플리케이션의 requests per second 값이나 보안통신이 되고 있는지 등 여러 내역들에 대해서 서비스 매쉬가 그래포로 그려지면서 한눈에 쉽게 확인할 수 있다.
+
+![Kiali](./img/kiali_dashboard.png)
+
