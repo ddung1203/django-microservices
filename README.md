@@ -6,7 +6,7 @@ MSA는 API를 통해서만 상호작용할 수 있으며, 각각의 서비스는
 
 또한, 본 프로젝트는 Istio를 통한 서비스 메시에 대한 이해와 활용을 목적으로 한다.
 
-[Istio 실습](#istio-실습)
+### [Istio 실습](#istio-실습)
 
 ## Architecture
 
@@ -371,22 +371,23 @@ istio가 설치되면 kube-apiserver에 mutating webhook admission controller가
 
 mutatingwebhookconfigutation을 확인하면, matchLabels에 istio-injection=enabled인 namespace를 대상으로 sidecar injection을 수행하도록 되어있다.
 
-label 제거
+**label 제거**
 
 ``` bash
 kubectl label ns istio istio-injection-
 ```
 
-> 수동 sidecar injection
-> 
-> ``` bash
-> istioctl kube-inject -f ./admin.yaml | kubectl apply -f -
-> ```
+**수동 sidecar injection**
+
+``` bash
+istioctl kube-inject -f ./admin.yaml | kubectl apply -f -
+```
 
 > 참고
+> 
 > initContainer는 사이드카가 시작되기 전에 실행된다. 컨테이너가 Istio의 initContainer보다 먼저 실행되면 보안 상 좋지 않다. 또한 Istio 이후에 컨테이너가 실행되면 네트워크에 액세스할 수 없다.
 > initContainer에서 network I/O를 수행하지 않도록 해야한다. 연결이 필요한 initContainer를 사용해야 하는 경우 work around가 필요하다.
-> 만약, InitContainer를 사용하는 경우, Pod의 init이 완료되지 않는다.
+> 만약 InitContainer를 사용하는 경우, Pod의 init이 완료되지 않는다.
 >
 > 따라서, Flask와 Django의 db init 및 migrate의 경우 Pod 배포 후 exec로 작업을 하였다.
 >
