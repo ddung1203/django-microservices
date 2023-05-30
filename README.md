@@ -19,7 +19,7 @@ Service Mesh는 인프라 레이어에서 처리하는 방법이다.
 
 본 프로젝트는 Istio를 통한 서비스 메시에 대한 이해와 활용을 목적으로 한다.
 
-### [Istio 실습](#istio-ec8ba4ec8ab5-1)
+### [Istio 실습](#istio-실습-1)
 
 ## Architecture
 
@@ -428,4 +428,14 @@ istioctl dashboard kiali
 하기와 같이 실제 구축한 애플리케이션의 requests per second 값이나 보안통신이 되고 있는지 등 여러 내역들에 대해서 서비스 매쉬가 그래포로 그려지면서 한눈에 쉽게 확인할 수 있다.
 
 ![Kiali](./img/kiali_dashboard.png)
+
+**Istio Gateway 및 VirtualService**
+
+목적: 서비스 간의 트래픽을 관리하고 보안, 트래픽 라우팅, 트래픽 제어 등의 기능을 제공하기 위한 Istio 컴포넌트
+
+기능
+
+- 서비스 트래픽 제어
+- 인바운드 및 아웃바운드 트래픽 제어
+- 가상 서비스 및 라우팅
 
