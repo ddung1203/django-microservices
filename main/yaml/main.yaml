@@ -15,7 +15,7 @@ kind: Deployment
 metadata:
   name: main-deploy
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: main
@@ -26,20 +26,20 @@ spec:
     spec:
       containers:
         - name: main
-          image: ddung1203/main:4
+          image: ddung1203/main:5
           command: ["python",  "main.py"]
           ports:
             - containerPort: 5000
           livenessProbe:
             httpGet:
-              path: /api/products
+              path: /api/product
               port: 5000
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /api/products
+              path: /api/product
               port: 5000
             initialDelaySeconds: 5
             periodSeconds: 2

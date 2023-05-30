@@ -33,11 +33,11 @@ class ProductUser(db.Model):
     )
 
 
-@app.route('/api/products')
+@app.route('/api/product')
 def index():
   return jsonify(Product.query.all())
 
-@app.route('/api/products/<int:id>/like', methods=['POST'])
+@app.route('/api/product/<int:id>/like', methods=['POST'])
 def like(id):
   req = requests.get('http://admin-svc-np.default.svc.cluster.local:8000/api/user')
   json = req.json()
