@@ -1,35 +1,32 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin-svc-np
+  name: admin-svc
+  labels:
+    app: admin
 spec:
-  type: NodePort
   selector:
-    tier: backend-admin
+    app: admin
   ports:
     - port: 8000
-      targetPort: 8000
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-v1
+  name: admin-deploy-v1
   labels:
-    app: msa
-    tier: backend-admin
+    app: admin
     version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: msa
-      tier: backend-admin
+      app: admin
       version: v1
   template:
     metadata:
       labels:
-        app: msa
-        tier: backend-admin
+        app: admin
         version: v1
     spec:
       containers:
@@ -52,31 +49,24 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 1
-      # initContainers:
-      #   - name: migration
-      #     image: ddung1203/admin:10
-      #     command: ["python", "manage.py", "migrate"]
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-v2
+  name: admin-deploy-v2
   labels:
-    app: msa
-    tier: backend-admin
+    app: admin
     version: v2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: msa
-      tier: backend-admin
+      app: admin
       version: v2
   template:
     metadata:
       labels:
-        app: msa
-        tier: backend-admin
+        app: admin
         version: v2
     spec:
       containers:
@@ -99,31 +89,24 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 1
-      # initContainers:
-      #   - name: migration
-      #     image: ddung1203/admin:10
-      #     command: ["python", "manage.py", "migrate"]
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-v3
+  name: admin-deploy-v3
   labels:
-    app: msa
-    tier: backend-admin
+    app: admin
     version: v3
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: msa
-      tier: backend-admin
+      app: admin
       version: v3
   template:
     metadata:
       labels:
-        app: msa
-        tier: backend-admin
+        app: admin
         version: v3
     spec:
       containers:
@@ -146,7 +129,3 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 1
-      # initContainers:
-      #   - name: migration
-      #     image: ddung1203/admin:10
-      #     command: ["python", "manage.py", "migrate"]

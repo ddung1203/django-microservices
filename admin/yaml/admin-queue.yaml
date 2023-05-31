@@ -1,16 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-queue-deploy
+  name: admin-queue
+  labels:
+    app: queue
+    version: admin
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin-queue
+      app: queue
+      version: admin
   template:
     metadata:
       labels:
-        app: admin-queue
+        app: queue
+        version: admin
     spec:
       containers:
         - name: admin-queue

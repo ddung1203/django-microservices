@@ -39,7 +39,7 @@ def index():
 
 @app.route('/api/product/<int:id>/like', methods=['POST'])
 def like(id):
-  req = requests.get('http://admin-svc-np.default.svc.cluster.local:8000/api/user')
+  req = requests.get('http://admin-svc.default.svc.cluster.local:8000/api/user')
   json = req.json()
 
   try:

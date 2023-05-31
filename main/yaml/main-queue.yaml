@@ -1,16 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: main-queue-deploy
+  name: main-queue
+  labels:
+    app: queue
+    version: main
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: main-queue
+      app: queue
+      version: main
   template:
     metadata:
       labels:
-        app: main-queue
+        app: queue
+        version: main
     spec:
       containers:
         - name: main-queue
