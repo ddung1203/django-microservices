@@ -52,9 +52,9 @@ Service Mesh는 인프라 레이어에서 처리하는 방법이다.
 
 `admin.yaml`
 
-Service는 `NodePort`로, `admin` 레이블을 가진 `Pod`를 선택한다. 8000 포트로 요청을 받아 해당 `Pod`의 8000 포트로 전달한다.
+Service는 `admin` 레이블을 가진 `Pod`를 선택한다. 8000 포트로 요청을 받아 해당 `Pod`의 8000 포트로 전달한다.
 
-Deployment는 3개의 복제본을 생성하며, `admin` 레이블을 가진 `Pod`에 대한 설정을 지정한다. 또한 Pod Template에서는 `admin` 컨테이너를 정의하고, `python manage.py runserver 0.0.0.0:8000` 명령을 실행한다.
+Deployment는 v1 ~ v3 각각 3개의 복제본을 생성하며, `admin` 레이블을 가진 `Pod`에 대한 설정을 지정한다. 또한 Pod Template에서는 `admin` 컨테이너를 정의하고, `python manage.py runserver 0.0.0.0:8000` 명령을 실행한다.
 
 추가로 livenessProbe와 readinessProbe가 정의되어 있으며, `/api/products` 경로로 8000 포트에 HTTP GET 요청을 보내고 응답을 기다린다. initialDelaySeconds, periodSeconds 및 timeoutSeconds는 livenessProbe가 시작되기까지의 지연 시간, 주기적으로 실행되는 간격 및 타임아웃을 나타낸다.
 
@@ -64,28 +64,33 @@ Deployment는 3개의 복제본을 생성하며, `admin` 레이블을 가진 `Po
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin-svc-np
+  name: admin-svc
+  labels:
+    app: admin
 spec:
-  type: NodePort
   selector:
     app: admin
   ports:
     - port: 8000
-      targetPort: 8000
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-deploy
+  name: admin-deploy-v1
+  labels:
+    app: admin
+    version: v1
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: admin
+      version: v1
   template:
     metadata:
       labels:
         app: admin
+        version: v1
     spec:
       containers:
         - name: admin
@@ -107,17 +112,15 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 2
             timeoutSeconds: 1
-      initContainers:
-        - name: migration
-          image: ddung1203/admin:10
-          command: ["python", "manage.py", "migrate"]
+---
+# v2 및 v3
 ```
 
 `admin-mysql-deployment.yaml`
 
 하기 코드는 Kubernetes 클러스터 내에서 실행되는 MySQL 데이터베이스를 위한 Service와 Deployment를 정의한다.
 
-먼저, `admin-mysql` Service는 MySQL 데이터베이스에 대한 접근을 제공하기 위해 사용된다. Service는 3306 포트로 접근 가능하며, `admin-mysql` 레이블을 가진 파드를 선택한다. 또한, `clusterIP: None`으로 설정되어 내부 클러스터 IP를 할당하지 않다. 이로 인해 헤드리스 서비스로 만들어 로드밸런싱이 필요없거나 단일 서비스 IP가 필요 없는 경우에 하기와 같이 사용한다.
+먼저, `admin-mysql` Service는 MySQL 데이터베이스에 대한 접근을 제공하기 위해 사용된다. Service는 3306 포트로 접근 가능하며, `admin-mysql` 레이블을 가진 파드를 선택한다.
 
 다음으로, `admin-mysql` Deployment는 `admin-mysql` 레이블을 가진 파드를 선택하며 배포 전략은 Recreate로 설정되어 있어 파드를 재생성하는 방식으로 업데이트를 수행한다.
 
@@ -136,27 +139,33 @@ apiVersion: v1
 kind: Service
 metadata:
   name: admin-mysql
+  labels:
+    app: admin-mysql
 spec:
-  ports:
-  - port: 3306
   selector:
     app: admin-mysql
-  clusterIP: None
+  ports:
+  - port: 3306
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: admin-mysql
+  labels:
+    app: admin-mysql
+    version: v1
 spec:
   selector:
     matchLabels:
       app: admin-mysql
+      version: v1
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: admin-mysql
+        version: v1
     spec:
       containers:
       - image: mysql:8.0.33-debian
@@ -323,8 +332,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq-svc
+  labels:
+    app: queue
 spec:
-  clusterIP: None
   selector:
     app: rabbitmq
   ports:
@@ -339,18 +349,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbitmq-deploy
+  labels:
+    app: queue
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: rabbitmq
+      version: v1
   template:
     metadata:
       labels:
         app: rabbitmq
+        version: v1
     spec:
       containers:
-        - name: myweb
+        - name: rabbitmq
           image: rabbitmq:management
           ports:
             - containerPort: 5672
@@ -429,7 +443,8 @@ istioctl dashboard kiali
 
 ![Kiali](./img/kiali_dashboard.png)
 
-**Istio Gateway 및 VirtualService**
+
+### Istio Gateway 및 VirtualService
 
 목적: 서비스 간의 트래픽을 관리하고 보안, 트래픽 라우팅, 트래픽 제어 등의 기능을 제공하기 위한 Istio 컴포넌트
 
@@ -438,4 +453,96 @@ istioctl dashboard kiali
 - 서비스 트래픽 제어
 - 인바운드 및 아웃바운드 트래픽 제어
 - 가상 서비스 및 라우팅
+
+**Istio Gateway**
+
+Public Cloud 환경의 K8s에서 배포를 해야할 경우, 외부에서 접근할 수 있도록 LoadBalancer 혹은 Ingress를 사용한다. 하지만 모든 Service를 LoadBalancer 타입으로 생성하기엔 비용 문제가 발생하며, 이 문제를 해결하기 위해 Ingress를 사용한다. Istio는 여기서 Service Mesh의 경계에서 Inbound/Outbound 트래픽을 처리할 수 있는 LoadBalancer를 제공하며, 이를 `Gateway`라는 Istio Resource로 설정할 수 있다.
+
+`istioctl install --set profile=demo -y`로 Istio를 설치했을 때, 하기와 같이 ingressgate와 egressgateway가 생성된다. 
+
+``` bash
+ vagrant@k8s-master > ~ > kubectl get po -n istio-system
+NAME                                   READY   STATUS    RESTARTS       AGE
+grafana-56bdf8bf85-p44gb               1/1     Running   0              3d
+istio-egressgateway-85649899f8-bsb4k   1/1     Running   0              3d
+istio-ingressgateway-f56888458-5pxtl   1/1     Running   0              3d
+istiod-64848b6c78-w8s4d                1/1     Running   0              3d
+jaeger-76cd7c7566-xnz5j                1/1     Running   0              3d
+kiali-7d7df7458c-h8w4k                 1/1     Running   0              3d
+prometheus-85949fddb-vr8pz             2/2     Running   0              3d                                                 
+```
+
+Gateway를 통해 설정할 수 있는 항목
+
+- Port
+- Protocol
+- SNI
+- TLS
+
+**VirtualService**
+
+VirtualService는 Envoy 프록시에게 어떤 목적지로 어떻게 트래픽을 전달할 지 알려주는 역할을 수행한다. 이를 통해 Routing 동작을 사용하자 원하는 대로 수정하여 Kubernetes에서 할 수 없었던 기능들을 제공한다.
+
+- Canary
+- HTTP 헤더 기반 Routing Rule
+- Fault Injection
+
+`gateway.yaml`
+``` yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: frontend-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: frontend
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - frontend-gateway
+  http:
+  - match:
+    route:
+    - destination:
+        host: frontend
+        port:
+          number: 3000
+```
+
+상기와 같이 설정 후 배포를 하면 Kiali Graph에서 하기와 같이 확인이 가능하다.
+
+**Idle 상태**
+
+![Kiali](./img/kiali_1.png)
+
+`queue`의 경우 admin, main의 consumer가 rabbitmq를 subscribe하게 된다. 또한 admin의 v1, v2, v3로 추후 Canary 혹은 Routing Rule을 적용해보는 실습을 하기 위해 생성해 두었다.
+
+만약 활성화된 웹 페이지의 경우 하기와 같이 트래픽이 진행된다.
+
+![Kiali](./img/kiali_2.png)
+
+Workloads 메뉴에선 현재 배포한 Workload(Deployment, StatefulSet 등)의 상태를 쉽게 파악할 수 있다.
+
+![Kiali](./img/kiali_3.png)
+
+![Kiali](./img/kiali_4.png)
+
+특히 유용한 기능 중 하나는 Workload를 선택했을 때, Log를 확인이 가능하다. 
+
+![Kiali](./img/kiali_5.png)
+
+| Yello의 경우 Istio-proxy의 Log, White의 경우 rabbitmq의 Log이다.
 
