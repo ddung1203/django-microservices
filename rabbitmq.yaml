@@ -6,11 +6,13 @@ metadata:
     app: queue
 spec:
   selector:
-    app: queue
+    app: rabbitmq
   ports:
   - port: 5672
+    targetPort: 5672
     name: amqp
   - port: 15672
+    targetPort: 15672
     name: console 
 ---
 apiVersion: apps/v1
@@ -19,17 +21,16 @@ metadata:
   name: rabbitmq-deploy
   labels:
     app: queue
-    version: v1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queue
+      app: rabbitmq
       version: v1
   template:
     metadata:
       labels:
-        app: queue
+        app: rabbitmq
         version: v1
     spec:
       containers:
