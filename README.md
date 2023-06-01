@@ -532,9 +532,15 @@ spec:
 
 만약 활성화된 웹 페이지의 경우 하기와 같이 트래픽이 진행된다.
 
+**Active 상태**
+
 ![Kiali](./img/kiali_2.png)
 
-Workloads 메뉴에선 현재 배포한 Workload(Deployment, StatefulSet 등)의 상태를 쉽게 파악할 수 있다.
+> 기존 배포 및 환경은 Label을 사용하지 않았다. Label을 적용하지 않았어도 배포 수준이 작다보니 리소스를 식별하는 데 문제가 없었지만, 생성된 Pod가 많아질 수록 복잡성이 증가했다. Label을 작성함으로 인해 쿼리를 실행하여 작업을 할 수도 있었으며 애플리케이션 관리와 배포가 더욱 용이해졌다.
+> 
+> 또한 Version을 통해 릴리즈마다 업데이트되고 개선되는 사항을 작성해 버전 관리가 가능해졌으며, 업그레이드나 롤백 등의 작업을 수행할 수 있다.
+
+Workloads 메뉴에선 현재 배포한 Workload(Deployment, StatefulSet)의 상태를 쉽게 파악할 수 있다.
 
 ![Kiali](./img/kiali_3.png)
 
@@ -544,5 +550,5 @@ Workloads 메뉴에선 현재 배포한 Workload(Deployment, StatefulSet 등)의
 
 ![Kiali](./img/kiali_5.png)
 
-| Yello의 경우 Istio-proxy의 Log, White의 경우 rabbitmq의 Log이다.
+> Yello의 경우 Istio-proxy의 Log, White의 경우 rabbitmq의 Log이다.
 
