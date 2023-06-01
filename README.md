@@ -483,6 +483,22 @@ Gateway를 통해 설정할 수 있는 항목
 
 VirtualService는 Envoy 프록시에게 어떤 목적지로 어떻게 트래픽을 전달할 지 알려주는 역할을 수행한다. 이를 통해 Routing 동작을 사용하자 원하는 대로 수정하여 Kubernetes에서 할 수 없었던 기능들을 제공한다.
 
+
+> ![Envoy](./img/envoy_1.png)
+> 
+> Envoy Proxy: 일반적인 Proxy이다. 일반적인 L4가 아닌, L7 Layer이다. 서비스가 서비스를 직접적으로 호출하는 것이 아닌 서킷브레이커 처럼 중간에 Proxy를 넣는다. 만약, 상대편에 응답이 없다면 timeout을 넣고 끊어버린다.
+>
+> Kubernetes의 하나의 Pod에는 여러개의 Container가 들어갈 수 있다. 여기에 Envoy Proxy Controller를 넣게 되고 하기와 같이 기능들이 가능하다.
+> 
+> ![Envoy](./img/envoy_2.png)
+> 
+> 실제로 많이 일어나는 것은, 우선순위를 높일 수 있다. 예를 들면 redirect가 우선적으로 일어나야 할 경우 먼저 처리할 수 있다.
+> 
+> => Mixer checks with appropriate adaptors (policy engine, quota adaptor) to verify that the call can proceed and returns true/false to Envoy
+> 
+> [Cloud Hackathon Tech Session - Kubernetes](https://youtu.be/rdyUAduXi48)
+
+
 - Canary
 - HTTP 헤더 기반 Routing Rule
 - Fault Injection
