@@ -656,7 +656,7 @@ HTTP 헤더의 특정 key-value를 확인하여 조건에 맞게 라우팅할 �
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: admin-headerbased
+  name: admin-header-based
 spec:
   hosts:
   - admin-svc
@@ -720,3 +720,72 @@ http:
     subset: v3
 ```
 
+**Fault Injection**
+
+특정 서비스에 과부하나 에러가 발생했을 경우, Application이 어떻게 대응하는지 테스트할 수 있는 Fault Injection 기능을 지원한다. VirtualService에 Fault Injection을 정의하면되므로 Resilience Test를 수행할 수 있다.
+
+- Fixed Delay
+
+`log-in-as-this-user`로 로그인했을 때, admin 서비스에 100% 확률로 2초간의 고정 딜레이를 발생
+
+``` yaml
+apiVersion: networking.iostio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: admin-fixed-delay
+spec:
+  hosts:
+  - admin-svc
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: log-in-as-this-user
+    fault:
+      delay:
+        percentage:
+          value: 100.0
+        fixedDelay: 2.0s
+    route:
+    - destination:
+        host: admin-svc
+        subset: v1
+  - route:
+    - destination:
+        host: admin-svc
+        subset: v1
+```
+
+- HTTP Error
+
+딜레이 외에도 지정된 HTTP Status Code를 확률적으로 반환하는 동작을 정의할 수 있다. admin 서비스에서 50% 확률로 404를 발생하는 예시는 다음과 같다.
+
+``` yaml
+apiVersion: networking.iostio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: admin-http-error
+spec:
+  hosts:
+  - admin-svc
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: log-in-as-this-user
+    fault:
+      abort:
+        percentage:
+          value: 50.0
+        httpStstus: 404
+    route:
+    - destination:
+        host: admin-svc
+        subset: v1
+  - route:
+    - destination:
+        host: admin-svc
+        subset: v1
+```
+
+이외에도 VirtualService 내에 Timeout, Retry, Mirroring 설정을 하여 각각 hang 상태를 방지, 재호출, 복사본 전송 기능을 할 수 있다.
