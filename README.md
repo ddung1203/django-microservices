@@ -568,3 +568,83 @@ Workloads 메뉴에선 현재 배포한 Workload(Deployment, StatefulSet)의 상
 
 > Yello의 경우 Istio-proxy의 Log, White의 경우 rabbitmq의 Log이다.
 
+### Traffic Management
+
+VirtualService와 DestinationRule을 통해 트래픽을 조건에 맞게 제어하고 관리할 수 있다.
+
+**Weighted Routing**
+
+Istio는 버전이 같은 Pod를 subset으로 묶고, VirtualService에서 subset으로 보내는 트래픽의 가중치를 달리함으로써 Canary Release 기능을 완벽하게 지원한다.
+
+1. Pod에 버전 정보 Label 추가
+2. DestinationRule 생성
+3. VirtualService에 subset 및 weight 추가
+
+- Pod에 버전 정보 Label 추가
+
+현재 v1, v2, v3의 admin deployment가 존재한다. 각각의 기능은 동일하지만 실제 적용 예시를 보이기 위해 적용하였다. 하지만 main의 경우 version에 따른 구분은 하지 않은 상황이다.
+
+- DestinationRule 생성
+
+Istio는 Service를 대신해서 DestinationRule을 정의하여 label에 따른 subset으로 pod를 구분할 수 있으며, 여기서 정의한 subset은 VirtualService의 host 추가 시 참조할 수 있다. DestinationRule의 기본 포맷은 하기와 같다.
+
+`destination-rule.yaml`
+``` yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: admin
+spec:
+  host: admin-svc
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+```
+
+Kubernetes에 적용 후에는 Kiali의 Istio Config에서 하기와 같이 확인이 가능하다.
+
+![Kiali](./img/kiali_6.png)
+
+`admin`을 선택하면 Overview 메뉴로 이동하며, YAML 파일을 확인할 수 있으며 수정이 가능함과 동시에 YAML에 문제가 있다면 에러 또한 확인이 가능하다.
+
+![Kiali](./img/kiali_7.png)
+
+- VirtualService에 subset 및 weight 추가
+
+`virtualservice-canary.yaml`
+
+``` yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: admin-canary
+spec:
+  hosts:
+    - admin-svc
+  http:
+  - route:
+    - destination:
+        host: admin-svc
+        subset: v1
+      weight: 80
+    - destination:
+        host: admin-svc
+        subset: v2
+      weight: 10
+    - destination:
+        host: admin-svc
+        subset: v3
+      weight: 10
+```
+
+Display 항목 중 `Traffic Distribution`을 활성화한다. 서비스를 확인하면 8:1:1로 근접한 수치가 나오는 것을 확인할 수 있다.
+
+![Kiali](./img/kiali_8.png)
+
