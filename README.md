@@ -648,3 +648,75 @@ Display 항목 중 `Traffic Distribution`을 활성화한다. 서비스를 확�
 
 ![Kiali](./img/kiali_8.png)
 
+**Header 기반 Routing**
+
+HTTP 헤더의 특정 key-value를 확인하여 조건에 맞게 라우팅할 수도 있다. 예를 들어, 로그인이 되지 않은 상태로 서비스를 이용할 경우 HTTP 헤더에 특정 값이 추가된다고 가정하자. 이를 VirtualService의 Routing Rule에서 참조할 수 있다.
+
+``` yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: admin-headerbased
+spec:
+  hosts:
+  - admin-svc
+  gateway:
+  - frontend-gateway
+  - mesh
+  http:
+  - match:
+    - headers:
+        # 추가되는 key-value 값
+        end-user:
+          exact: log-in-as-this-user
+    route:
+    - destination:
+        host: admin-svc
+        subset: v1
+    - route:
+      - destination:
+          host: admin-svc
+          subset: v1
+        weight: 80
+      - destination:
+          host: admin-svc
+          subset: v2
+        weight: 10
+      - destination:
+          host: admin-svc
+          subset: v3
+        weight: 10
+```
+
+**Query 기반 Routing**
+
+VirtualService의 match 조건 중 Query Parameter를 사용하여 Routing하는 방식도 정의 가능하다. 예를 들어 `<base url>/admin/products?foo=bar` 형식의 request 발생 시, 하기와 같이 admins 서비스의 특정 subset으로 라우팅할 수 있다.
+
+``` yaml
+http:
+- match:
+  - queryParams:
+      foo:
+        exact: "bar"
+  route:
+  - destination:
+      host: admin-svc
+      subset: v3
+```
+
+**URI Path 기반 Routing**
+
+Query 기반 라우팅과 비슷하게, Path를 사용하여 subset으로 라우팅이 가능하다.
+
+```yaml
+http:
+- match:
+  - uri:
+      regex: '^/admin/products/v3'
+    ignoreUriCase: true
+  route:
+  - destination:
+    host: admin-svc
+    subset: v3
+```
+
