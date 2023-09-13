@@ -1,0 +1,12 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: admin-circuit-breaker
+spec:
+  host: admin-svc
+  trafficPolicy:
+    outlierDetection:
+      interval: 1s
+      consecutive5xxErrors: 1
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
