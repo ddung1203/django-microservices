@@ -23,9 +23,16 @@ Service Mesh는 인프라 레이어에서 처리하는 방법이다.
 
 ## Architecture
 
+MSA Architecture
+
 ![Architecture](./img/architecture.png)
 
 상기와 같이 앱을 서로 통신하는 작은 부분으로 나눌 수 있다. 이를 통해 트래픽을 기반으로 애플리케이션을 쉽게 확장할 수 있으며, 일부 장애가 전체 서비스로 확장될 가능성이 낮다.
+
+Service Mesh Architecture
+
+![Istio Architecture](./img/istio.png)
+
 
 ### [Bakend](https://github.com/ddung1203/python-microservices)
 
@@ -789,3 +796,49 @@ spec:
 ```
 
 이외에도 VirtualService 내에 Timeout, Retry, Mirroring 설정을 하여 각각 hang 상태를 방지, 재호출, 복사본 전송 기능을 할 수 있다.
+
+### Circuit Breaker
+
+Circuit Break는 전기의 회로 차단기에서 차용한 개념이다. 평소에는 정상적으로 작동하다가, 오류 발생 시 작동하지 않도록 한다.
+
+만약 하나의 서비스가 장애가 발생하게 되면 장애 서비스를 호출하는 서비스는 대기 상태가 되고 다시 대기 중인 서비스를 호출하는 또 다른 서비스도 대기하게 되어 장애가 차례대로 전파된다. Circuit Breaker는 이러한 문제가 되는 기능 자체를 동작하지 않도록 해 리소스 점유의 증가로 장애가 전파되지 않도록 한다.
+
+- Load balancing pool의 인스턴스의 상태에 기반하는 circuit breaker
+
+  - 인스턴스에 대한 load balancing pool이 생성/운영된다.
+  - n개의 인스턴스를 가지는 load balancing pool 중 응답이 없는 인스턴스를 탐지하고 배제한다.
+  - HTTP 서비스인 경우 미리 정의된 시간 동안 API 호출 할 때 5xx 에러가 지속적으로 리턴되면 pool 로 부터 제외된다.
+  - TCP 서비스인 경우 연속 오류 매트릭 측정 시 connection timeout 또는 connection 실패 하게되면 오류 hosts로 카운트된다.
+
+> 전제 조건: v1, v2, v3의 인스턴스 중 v3의 인스턴스에게 503 에러가 발생하도록 설정함
+
+Circuit Breaker 적용 전, 503에러가 작동하는 v3의 인스턴스
+
+![Before circuit breaker](./img/before.png)
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: admin-circuit-breaker
+spec:
+  host: admin-svc
+  trafficPolicy:
+    outlierDetection:
+      interval: 1s
+      consecutive5xxErrors: 1
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
+```
+
+> 매 1s 마다 스캔하여, 연속적으로 5xx 에러가 1번 발생하면 baseEjectionTime 동안 배제 처리 된다.
+
+상기의 `admin-circuit-breaker`를 적용 후 *귀여운* 번개 모양의 아이콘이 나타나며, v3 인스턴스의 상태는 하기와 같이 변경된다.
+
+![After circuit breaker](./img/after1.png)
+
+![After circuit breaker](./img/after2.png)
+
+![After circuit breaker](./img/after3.png)
+
+![After circuit breaker](./img/after4.png)
